@@ -12,6 +12,7 @@ import { Bingo } from "@/components/Bingo";
 import { downloadCard } from "@/lib/card";
 
 const STORAGE_KEY = "onplas-attitude-v4";
+const ROMAN = ["I", "II", "III", "IV", "V", "VI"];
 
 function loadState(): SheetState {
   try {
@@ -103,10 +104,10 @@ export default function App() {
         </div>
 
         {AXIS_GROUPS.map((g, gi) => (
-          <section key={g.id} className="mt-10">
+          <section key={g.id} className="mt-12">
             <div className="mb-7 flex items-baseline gap-3">
-              <h2 className="font-heading text-[12px] tracking-[0.28em] text-muted uppercase">{g.title}</h2>
-              <span className="hair flex-1" />
+              <span className="font-heading text-[15px] font-medium text-accent tabular-nums">{ROMAN[gi]}</span>
+              <h2 className="font-heading text-[14px] font-medium tracking-[0.22em] text-ink uppercase">{g.title}</h2>
             </div>
 
             <div className="grid gap-x-10 gap-y-8 sm:grid-cols-2">
@@ -126,9 +127,9 @@ export default function App() {
         {/* ——— бинго ——— */}
         <section className="mt-14">
           <div className="mb-3 flex items-baseline gap-3">
-            <h2 className="font-heading text-[12px] tracking-[0.28em] text-muted uppercase">Бинго</h2>
-            <span className="hair flex-1" />
-            <span className="text-[11px] text-faint">
+            <span className="font-heading text-[15px] font-medium text-accent tabular-nums">{ROMAN[AXIS_GROUPS.length]}</span>
+            <h2 className="font-heading text-[14px] font-medium tracking-[0.22em] text-ink uppercase">Бинго</h2>
+            <span className="ml-auto text-[11px] text-faint">
               {state.bingo.length} из {BINGO_POOL.length}
             </span>
           </div>
