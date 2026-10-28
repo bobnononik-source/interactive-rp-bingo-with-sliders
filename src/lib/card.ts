@@ -2,7 +2,6 @@ import {
   AXIS_GROUPS,
   BINGO_POOL,
   WORLD_AXES,
-  bingoLines,
   type SheetState,
 } from "@/data/sheet";
 
@@ -196,7 +195,6 @@ export function buildCard(state: SheetState): HTMLCanvasElement {
 
   /* ——— бинго ——— */
   if (items.length) {
-    const lines = bingoLines(state.bingoSet, state.bingo);
     setSpacing(ctx, 4);
     ctx.font = `600 15px ${SERIF}`;
     ctx.fillStyle = C.soft;
@@ -205,12 +203,8 @@ export function buildCard(state: SheetState): HTMLCanvasElement {
     setSpacing(ctx, 0);
     ctx.font = `400 14px ${SERIF}`;
     ctx.fillStyle = C.faint;
-    ctx.fillText(
-      `${items.length} из 25${lines ? ` · БИНГО ×${lines}` : ""}`,
-      PAD + tw + 22,
-      y,
-    );
-    hLine(ctx, y - 5, PAD + tw + 150 + (lines ? 40 : 0), PAD + CW, C.lineSoft);
+    ctx.fillText(`${items.length} из ${BINGO_POOL.length}`, PAD + tw + 22, y);
+    hLine(ctx, y - 5, PAD + tw + 120, PAD + CW, C.lineSoft);
     y += 40;
 
     const colW2 = (CW - 46) / 2;

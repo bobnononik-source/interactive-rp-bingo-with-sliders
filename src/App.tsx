@@ -2,9 +2,8 @@ import { useCallback, useEffect, useState } from "react";
 import { cn } from "@/utils/cn";
 import {
   AXIS_GROUPS,
+  BINGO_POOL,
   WORLD_AXES,
-  bingoLines,
-  defaultBingoSet,
   emptyState,
   type SheetState,
 } from "@/data/sheet";
@@ -19,7 +18,14 @@ function loadState(): SheetState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (raw) {
       const parsed = JSON.parse(raw) as SheetState;
-      return { ...emptyState(), ...parsed, sliders: { ...emptyState().sliders, ...parsed.sliders } };
+      const base = emptyState();
+      const validIds = new Set(BINGO_POOL.map((b) => b.id));
+      return {
+        ...base,
+        name: parsed.name ?? "",
+        sliders: { ...base.sliders, ...parsed.sliders },
+        bingo: (parsed.bingo ?? []).filter((id) => validIds.has(id)),
+      };
     }
   } catch {
     /* ignore */
@@ -32,11 +38,14 @@ export default function App() {
   const [toast, setToast] = useState("");
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      /* ignore */
-    }
+    const t = window.setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch {
+        /* ignore */
+      }
+    }, 250);
+    return () => window.clearTimeout(t);
   }, [state]);
 
   useEffect(() => {
@@ -45,12 +54,22 @@ export default function App() {
     return () => clearTimeout(t);
   }, [toast]);
 
-  const patch = useCallback((fn: (s: SheetState) => SheetState) => setState((s) => fn(s)), []);
-  const setSlider = (id: string, v: number) => patch((s) => ({ ...s, sliders: { ...s.sliders, [id]: v } }));
-  const toggleBingo = (id: number) =>
-    patch((s) => ({ ...s, bingo: s.bingo.includes(id) ? s.bingo.filter((x) => x !== id) : [...s.bingo, id] }));
+  const setSlider = useCallback((id: string, v: number) => {
+    setState((s) => {
+      if (s.sliders[id] === v) return s;
+      return { ...s, sliders: { ...s.sliders, [id]: v } };
+    });
+  }, []);
 
-  const lines = bingoLines(state.bingoSet, state.bingo);
+  const toggleBingo = useCallback((id: number) => {
+    setState((s) => ({
+      ...s,
+      bingo: s.bingo.includes(id) ? s.bingo.filter((x) => x !== id) : [...s.bingo, id],
+    }));
+  }, []);
+
+  const patch = useCallback((fn: (s: SheetState) => SheetState) => setState((s) => fn(s)), []);
+
   const done = WORLD_AXES.filter((a) => (state.sliders[a.id] ?? 50) !== 50).length;
 
   return (
@@ -109,15 +128,12 @@ export default function App() {
           <div className="mb-3 flex items-baseline gap-3">
             <h2 className="font-heading text-[12px] tracking-[0.28em] text-muted uppercase">Бинго</h2>
             <span className="hair flex-1" />
-            {lines > 0 && <span className="text-[11px] text-accent">бинго ×{lines}</span>}
+            <span className="text-[11px] text-faint">
+              {state.bingo.length} из {BINGO_POOL.length}
+            </span>
           </div>
           <p className="mb-5 text-[12.5px] text-faint">Отметь, что верно для персонажа сейчас</p>
-          <Bingo
-            state={state}
-            toggle={toggleBingo}
-            reshuffle={() => patch((s) => ({ ...s, bingoSet: defaultBingoSet(), bingo: [] }))}
-            clear={() => patch((s) => ({ ...s, bingo: [] }))}
-          />
+          <Bingo state={state} toggle={toggleBingo} />
         </section>
 
         {/* ——— скачать ——— */}
