@@ -1,2 +1,12 @@
-# interactive-rp-bingo-with-sliders
-Интерактивное RP-бинго со слайдерами
+# Интерактивное RP-бинго со слайдерами
+
+Исходники проекта и автоматическая публикация на GitHub Pages.
+
+После каждого push в `main` GitHub Actions собирает приложение командой `npm run build` и публикует `dist/`.
+
+## Локальный запуск
+
+```sh
+npm ci
+npm run dev
+```
